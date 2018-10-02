@@ -1,8 +1,6 @@
 // @flow
 
-import type {
-  StyleObj,
-} from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
+import type, { StyleObj } from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
 
 import * as React from 'react';
 import PropTypes from 'prop-types';
@@ -22,8 +20,6 @@ import invariant from 'invariant';
 
 const windowWidth = Dimensions.get('window').width;
 
-type KeyboardShouldPersistTapsProps =
-  "always" | "never" | "handled" | false | true;
 type RequiredProps<T> = {
   /**
    * An array of tags, which can be any type, as long as labelExtractor below
@@ -96,6 +92,10 @@ type OptionalProps = {
    * Any ScrollView props (horizontal, showsHorizontalScrollIndicator, etc.)
   */
   scrollViewProps?: $PropertyType<ScrollView, 'props'>,
+  /**
+   * TextInput keyboard submit action
+   */
+  onSubmitEditing?: () => void
 };
 type Props<T> = RequiredProps<T> & OptionalProps;
 type State = {
@@ -253,16 +253,66 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     const scrollView = this.scrollView;
     invariant(
       scrollView,
-      "this.scrollView ref should exist before scrollToEnd called",
+      "this.scrollView ref should exist before scrollToTop called",
     );
     setTimeout(() => {
-      scrollView.scrollTo({x: 0, y: 0, animated: true });
+      scrollView.scrollTo({ x: 0, y: 0, animated: true });
     }, 0);
   }
 
 
   render() {
-    const tags = this.props.value.map((tag, index) => (
+    return (
+      <TouchableWithoutFeedback
+        onPress={this.focus}
+        style={styles.container}
+        onLayout={this.measureWrapper}
+      >
+        <View style={[styles.wrapper, { height: this.state.wrapperHeight }]}>
+          <ScrollView
+            ref={this.scrollViewRef}
+            style={styles.tagInputContainerScroll}
+            onContentSizeChange={this.onScrollViewContentSizeChange}
+            keyboardShouldPersistTaps="handled"
+            {...this.props.scrollViewProps}
+          >
+            <View style={styles.tagInputContainer}>
+              {this._renderTags()}
+              <View style={[
+                styles.textInputContainer,
+                { width: this.state.inputWidth },
+              ]}>
+                <TextInput
+                  ref={this.tagInputRef}
+                  blurOnSubmit={false}
+                  onKeyPress={this.onKeyPress}
+                  value={this.props.text}
+                  style={[styles.textInput, {
+                    width: this.state.inputWidth,
+                    color: this.props.inputColor,
+                  }]}
+                  onSubmitEditing={() => this.props.onSubmitEditing()}
+                  onBlur={Platform.OS === "ios" ? this.onBlur : undefined}
+                  onChangeText={(text: string) => this.props.onChangeText(text)}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  placeholder="Start typing"
+                  returnKeyType="done"
+                  keyboardType="default"
+                  editable={this.props.editable}
+                  underlineColorAndroid="rgba(0,0,0,0)"
+                  {...this.props.inputProps}
+                />
+              </View>
+            </View>
+          </ScrollView>
+        </View>
+      </TouchableWithoutFeedback >
+    )
+  }
+
+  _renderTags() {
+    return this.props.value.map((tag, index) => (
       <Tag
         index={index}
         label={this.props.labelExtractor(tag)}
@@ -277,55 +327,6 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
         editable={this.props.editable}
       />
     ));
-
-    return (
-      <TouchableWithoutFeedback
-        onPress={this.focus}
-        style={styles.container}
-        onLayout={this.measureWrapper}
-      >
-        <View style={[styles.wrapper, { height: this.state.wrapperHeight }]}>
-          <ScrollView
-            ref={this.scrollViewRef}
-            style={styles.tagInputContainerScroll}
-            onContentSizeChange={this.onScrollViewContentSizeChange}
-            keyboardShouldPersistTaps={
-              ("handled": KeyboardShouldPersistTapsProps)
-            }
-            {...this.props.scrollViewProps}
-          >
-            <View style={styles.tagInputContainer}>
-              {tags}
-              <View style={[
-                styles.textInputContainer,
-                { width: this.state.inputWidth },
-              ]}>
-                <TextInput
-                  ref={this.tagInputRef}
-                  blurOnSubmit={false}
-                  onKeyPress={this.onKeyPress}
-                  value={this.props.text}
-                  style={[styles.textInput, {
-                    width: this.state.inputWidth,
-                    color: this.props.inputColor,
-                  }]}
-                  onBlur={Platform.OS === "ios" ? this.onBlur : undefined}
-                  onChangeText={this.props.onChangeText}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  placeholder="Start typing"
-                  returnKeyType="done"
-                  keyboardType="default"
-                  editable={this.props.editable}
-                  underlineColorAndroid="rgba(0,0,0,0)"
-                  {...this.props.inputProps}
-                />
-              </View>
-            </View>
-          </ScrollView>
-        </View>
-      </TouchableWithoutFeedback>
-    )
   }
 
   tagInputRef = (tagInput: ?React.ElementRef<typeof TextInput>) => {
@@ -417,12 +418,12 @@ class Tag extends React.PureComponent<TagProps> {
     } else {
       tagLabel = (
         <Text style={[
-            styles.tagText,
-            { color: this.props.tagTextColor },
-            this.props.tagTextStyle,
-          ]}>
-            {this.props.label}
-            &nbsp;&times;
+          styles.tagText,
+          { color: this.props.tagTextColor },
+          this.props.tagTextStyle,
+        ]}>
+          {this.props.label}
+          &nbsp;&times;
         </Text>
       );
     }
