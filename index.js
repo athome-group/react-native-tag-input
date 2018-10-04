@@ -101,6 +101,7 @@ type Props<T> = RequiredProps<T> & OptionalProps;
 type State = {
   inputWidth: number,
   wrapperHeight: number,
+  text: string
 };
 
 class TagInput<T> extends React.PureComponent<Props<T>, State> {
@@ -162,6 +163,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     this.state = {
       inputWidth: props.inputDefaultWidth,
       wrapperHeight: 36,
+      text: ""
     }
   }
 
@@ -173,14 +175,17 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
       this.wrapperWidth,
     );
     if (inputWidth !== this.state.inputWidth) {
-      this.setState({ inputWidth });
+      this.setState({ inputWidth: inputWidth });
     }
     const wrapperHeight = Math.min(
       nextProps.maxHeight,
       this.contentHeight,
     );
     if (wrapperHeight !== this.state.wrapperHeight) {
-      this.setState({ wrapperHeight });
+      this.setState({ wrapperHeight: wrapperHeight });
+    }
+    if (nextProps.text !== this.state.text) {
+      this.setState({ text: nextProps.text });
     }
   }
 
@@ -202,7 +207,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
       this.wrapperWidth,
     );
     if (inputWidth !== this.state.inputWidth) {
-      this.setState({ inputWidth });
+      this.setState({ inputWidth: inputWidth });
     }
   }
 
@@ -286,7 +291,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
                   ref={this.tagInputRef}
                   blurOnSubmit={false}
                   onKeyPress={this.onKeyPress}
-                  value={this.props.text}
+                  value={this.state.text}
                   style={[styles.textInput, {
                     width: this.state.inputWidth,
                     color: this.props.inputColor,
@@ -365,7 +370,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
       this.wrapperWidth,
     );
     if (inputWidth !== this.state.inputWidth) {
-      this.setState({ inputWidth });
+      this.setState({ inputWidth: inputWidth });
     }
   }
 
