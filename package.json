@@ -27,16 +27,16 @@
     "flow": "flow"
   },
   "dependencies": {
-    "invariant": "^2.2.2",
-    "prop-types": "^15.5.10"
+    "invariant": "2.2.4",
+    "prop-types": "15.7.2"
   },
   "peerDependencies": {
     "react": "*",
     "react-native": "*"
   },
   "devDependencies": {
-    "react": "16.4.2",
-    "react-native": "^0.56.0",
-    "flow-bin": "^0.81.0"
+    "react": "16.9.0",
+    "react-native": "0.61.5",
+    "flow-bin": "0.116.1"
   }
 }
