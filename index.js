@@ -317,7 +317,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
                   ref={this.tagInputRef}
                   blurOnSubmit={false}
                   onKeyPress={this.onKeyPress}
-                  value={this.state.text}
+                  value={this.props.text}
                   style={[
                     styles.textInput,
                     {
